@@ -8,11 +8,8 @@ const pool = mysql.createPool({
 
     user: 'root',
 
-    port: "3306",
-
     database: 'hospital',
 
-    password: '1234'
 })
 
 export default pool;
