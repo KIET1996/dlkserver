@@ -38,3 +38,36 @@ exports.delete = async (dateSchedule, timeStart, timeEnd, doctorId) => {
     );
     return result;
 };
+
+exports.getByDoctorId = async (doctorId) => {
+    const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE DoctorId = ?`, [doctorId]);
+    const formattedRows = rows.map(item => {
+        return {
+            ...item,
+            DateSchedule: moment(item.DateSchedule).format('YYYY-MM-DD')
+        };
+    });
+    return formattedRows;
+};
+
+exports.getByDate = async (date) => {
+    const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE DateSchedule = ?`, [date]);
+    const formattedRows = rows.map(item => {
+        return {
+            ...item,
+            DateSchedule: moment(item.DateSchedule).format('YYYY-MM-DD')
+        };
+    });
+    return formattedRows;
+}
+
+exports.getByWeek = async (date) => {
+    const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE YEARWEEK(DateSchedule, 1) = YEARWEEK(?, 1)`, [date]);
+    const formattedRows = rows.map(item => {
+        return {
+            ...item,
+            DateSchedule: moment(item.DateSchedule).format('YYYY-MM-DD')
+        };
+    });
+    return formattedRows;
+}

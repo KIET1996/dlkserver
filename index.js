@@ -3,13 +3,13 @@ import medicalSpecialtyRouter from './src/routers/medicalSpecialty.router.js';
 import annoucementRouter from './src/routers/annoucement.router.js';
 import scheduleRouter from './src/routers/schedule.router.js';
 import bookingRouter from './src/routers/booking.router.js';
-
+import bodyParser from 'body-parser';
 const app = express();
 const port = process.env.PORT || 8080;
 
 app.use(express.json());
-
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
+ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/medicalSpecialty', medicalSpecialtyRouter);
 app.use('/api/announcement', annoucementRouter);

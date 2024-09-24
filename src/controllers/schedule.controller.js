@@ -18,6 +18,8 @@ exports.getAll = async (req, res) => {
 };
 
 exports.add = async (req, res) => {
+  console.log(req.file);
+  return 0;
   try {
     const { dateSchedule, timeStart, timeEnd, doctorId } = req.body;
     if (!dateSchedule || !timeStart || !timeEnd || !doctorId) {
@@ -98,6 +100,78 @@ exports.delete = async (req, res) => {
     res.status(500).json({
       errcode: 1,
       message: "Delete schedule error",
+      error: e,
+    });
+  }
+};
+
+exports.getByDoctorId = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    if (!doctorId) {
+      return res.status(400).json({
+        errcode: 1,
+        message: "Required fields missing",
+      });
+    }
+    const result = await scheduleService.getByDoctorId(doctorId);
+    res.status(200).json({
+      errcode: 0,
+      message: "Get schedules by doctorId success",
+      data: result,
+    });
+  } catch (e) {
+    res.status(500).json({
+      errcode: 1,
+      message: "Get schedules by doctorId error",
+      error: e,
+    });
+  }
+};
+
+exports.getByDate = async (req, res) => {
+  try {
+    const { date } = req.params;
+    if (!date) {
+      return res.status(400).json({
+        errcode: 1,
+        message: "Required fields missing",
+      });
+    }
+    const result = await scheduleService.getByDate(date);
+    res.status(200).json({
+      errcode: 0,
+      message: "Get schedules by date success",
+      data: result,
+    });
+  } catch (e) {
+    res.status(500).json({
+      errcode: 1,
+      message: "Get schedules by date error",
+      error: e,
+    });
+  }
+};
+
+exports.getByWeek = async (req, res) => {
+  try {
+    const { date } = req.params;
+    if (!date) {
+      return res.status(400).json({
+        errcode: 1,
+        message: "Required fields missing",
+      });
+    }
+    const result = await scheduleService.getByWeek(date);
+    res.status(200).json({
+      errcode: 0,
+      message: "Get schedules by week success",
+      data: result,
+    });
+  } catch (e) {
+    res.status(500).json({
+      errcode: 1,
+      message: "Get schedules by week error",
       error: e,
     });
   }
