@@ -8,7 +8,7 @@ CREATE TABLE user (
 
 CREATE TABLE medicalSpecialty(
     Id INT AUTO_INCREMENT PRIMARY KEY,
-    NameMedicalSpecialty VARCHAR(255)
+    NameMedicalSpecialty VARCHAR(255) UNIQUE
 );
 
 CREATE TABLE doctor(
