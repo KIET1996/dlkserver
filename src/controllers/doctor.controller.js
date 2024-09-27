@@ -62,19 +62,18 @@ exports.getId = async (req, res, next) => {
 };
 
 exports.add = async (req, res, next) => {
-  upload(req, res, async function (err) {
-    if (err instanceof multer.MulterError) {
-      console.log("Multer Error:", err);
-      return res.status(500).json({ error: "Error uploading file" });
-    } else if (err) {
-      console.log("Unknown Error:", err);
-      return res.status(500).json({ error: "Error uploading file" });
-    }
+  // upload(req, res, async function (err) {
+  //   if (err instanceof multer.MulterError) {
+  //     console.log("Multer Error:", err);
+  //     return res.status(500).json({ error: "Error uploading file" });
+  //   } else if (err) {
+  //     console.log("Unknown Error:", err);
+  //     return res.status(500).json({ error: "Error uploading file" });
+  //   }
 
     if (
       !req.body.name ||
       !req.body.birthday ||
-      !req.body.gender ||
       !req.body.scoreEvaluate ||
       !req.body.associateProfessor ||
       !req.body.numberEvaluate ||
@@ -83,44 +82,57 @@ exports.add = async (req, res, next) => {
       return next(new ApiError(400, "Not enough field require"));
     }
 
-    const avatar = req.file.buffer.toString("base64");
+    // const avatar = req.file.buffer.toString("base64");
 
     try {
+      // Bắt đầu transaction
+      await userService.startTransaction();
+
+      // Thêm user vào cơ sở dữ liệu
       var addUser = await userService.add(req.body);
+
+      if (addUser.affectedRows === 1) {
+        try {
+          // Thêm doctor vào cơ sở dữ liệu
+          const result = await doctorService.add(
+            addUser.insertId,
+            req.body
+          );
+
+          // Commit transaction nếu mọi thứ thành công
+          await userService.commitTransaction();
+
+          res.status(200).json({
+            errcode: 0,
+            message: "Add success",
+            data: result,
+          });
+        } catch (error) {
+          // Nếu thêm doctor thất bại, rollback transaction
+          await userService.rollbackTransaction();
+          res.status(500).json({
+            errcode: 1,
+            message: "Add fail: could not add doctor",
+            error: error,
+          });
+        }
+      } else {
+        // Nếu thêm user thất bại
+        await userService.rollbackTransaction();
+        res.status(500).json({
+          errcode: 1,
+          message: "Add fail: could not add user",
+        });
+      }
     } catch (error) {
+      // Lỗi trong quá trình thêm user
       res.status(500).json({
         errcode: 1,
         message: "Add fail",
       });
       return next(new ApiError(500, "Can not add user"));
     }
-
-    if (addUser.affectedRows === 1) {
-      try {
-        const result = await doctorService.add(
-          addUser.insertId,
-          req.body,
-          avatar
-        );
-        res.status(200).json({
-          errcode: 0,
-          message: "Add success",
-          data: result,
-        });
-      } catch (error) {
-        res.status(500).json({
-          errcode: 1,
-          message: "Add fail",
-          error: error,
-        });
-      }
-    } else {
-      res.status(500).json({
-        errcode: 1,
-        message: "Add fail",
-      });
-    }
-  });
+  // });
 };
 
 exports.getDoctorSalient = async (req, res, next) => {
@@ -165,9 +177,10 @@ exports.update = async (req, res, next) => {
     }
 
     if (
+      !req.body.email ||
+      !req.body.phonenumber ||
       !req.body.name ||
       !req.body.birthday ||
-      !req.body.gender ||
       !req.body.scoreEvaluate ||
       !req.body.associateProfessor ||
       !req.body.numberEvaluate ||
@@ -178,7 +191,7 @@ exports.update = async (req, res, next) => {
 
     var avatar = null;
 
-    if (checkFileImg) {
+    if (checkFileImg && req.file != undefined) {
       avatar = req.file.buffer.toString("base64");
     }
 

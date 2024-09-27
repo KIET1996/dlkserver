@@ -22,7 +22,6 @@ exports.getId = async (req, res, next) => {
         error: error,
       });
     }
-    
   } catch (error) {
     res.status(500).json({
       errcode: 1,
@@ -42,14 +41,14 @@ exports.add = async (req, res, next) => {
     res.status(200).json({
       errcode: 0,
       message: "Add success",
-      data: result
+      data: result,
     });
   } catch (error) {
     res.status(500).json({
       errcode: 1,
       message: "Add fail",
-      error: error
-    })
+      error: error,
+    });
   }
 };
 
@@ -67,13 +66,13 @@ exports.update = async (req, res, next) => {
     if (result.affectedRows === 0) {
       res.status(404).json({
         errcode: 1,
-        message: "Not found"
+        message: "Not found",
       });
     } else {
       res.status(200).json({
         errcode: 0,
         message: "update success",
-        data: result
+        data: result,
       });
     }
   } catch (error) {
@@ -82,33 +81,33 @@ exports.update = async (req, res, next) => {
       message: "update fail",
       error: error,
     });
-  } 
+  }
 };
 
 exports.delete = async (req, res, next) => {
   if (!req.params.id) {
     return next(new ApiError(400, "Id is require"));
+  }
+
+  try {
+    const result = await UserServices.delete(req.params.id);
+    if (result.affectedRows === 0) {
+      res.status(404).json({
+        errcode: 1,
+        message: "Can not found user",
+        error: error,
+      });
+    } else {
+      res.status(200).json({
+        errcode: 0,
+        message: "delete success",
+      });
     }
-    
-    try {
-      const result = await UserServices.delete(req.params.id);
-      if (result.affectedRows === 0) {
-        res.status(404).json({
-          errcode: 1,
-          message: "Can not found user",
-          error: error,
-        });
-      } else {
-        res.status(200).json({
-          errcode: 0,
-          message: "delete success",
-        });
-      }
-    } catch (error) {
-       res.status(500).json({
-         errcode: 1,
-         message: "delete fail",
-         error: error,
-       });
-    }
+  } catch (error) {
+    res.status(500).json({
+      errcode: 1,
+      message: "delete fail",
+      error: error,
+    });
+  }
 };

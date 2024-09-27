@@ -62,27 +62,28 @@ exports.getId = async (req, res, next) => {
 };
 
 exports.add = async (req, res, next) => {
-  upload(req, res, async function (err) {
-    if (err instanceof multer.MulterError) {
-      console.log("Multer Error:", err);
-      return res.status(500).json({ error: "Error uploading file" });
-    } else if (err) {
-      console.log("Unknown Error:", err);
-      return res.status(500).json({ error: "Error uploading file" });
-    }
+  // upload(req, res, async function (err) {
+  //   if (err instanceof multer.MulterError) {
+  //     console.log("Multer Error:", err);
+  //     return res.status(500).json({ error: "Error uploading file" });
+  //   } else if (err) {
+  //     console.log("Unknown Error:", err);
+  //     return res.status(500).json({ error: "Error uploading file" });
+  //   }
+
+  // console.log(req.body);
 
     if (
       !req.body.name ||
       !req.body.birthday ||
       !req.body.address ||
-      !req.body.profession ||
-      !req.body.gender
+      !req.body.profession
     ) {
-      return next(new ApiError(400, "not enough field require"));
+      return next(new ApiError(400, "Not enough field require"));
     }
 
-    const avatar = req.file.buffer.toString("base64");
-
+    // const avatar = req.file.buffer.toString("base64");
+  
     try {
       var addUser = await userService.add(req.body);
     } catch (error) {
@@ -97,8 +98,7 @@ exports.add = async (req, res, next) => {
       try {
         const result = await patientService.add(
           addUser.insertId,
-          req.body,
-          avatar
+          req.body
         );
         res.status(200).json({
           errcode: 0,
@@ -118,7 +118,7 @@ exports.add = async (req, res, next) => {
         message: "Add faild",
       });
     }
-  });
+  // });
 };
 
 exports.update = async (req, res, next) => {
@@ -138,19 +138,19 @@ exports.update = async (req, res, next) => {
     }
 
     if (
+      !req.body.email ||
+      !req.body.phonenumber ||
       !req.body.name ||
       !req.body.birthday ||
       !req.body.address ||
-      !req.body.profession ||
-      !req.body.gender ||
-      !req.body.avatar
+      !req.body.profession
     ) {
-      return next(new ApiError(400, "not enough field require"));
+      return next(new ApiError(400, "Not enough field require"));
     }
 
     var avatar = null;
 
-    if (checkFileImg) {
+    if (checkFileImg && req.file != undefined) {
       avatar = req.file.buffer.toString("base64");
     }
 
@@ -209,3 +209,5 @@ exports.delete = async (req, res, next) => {
     });
   }
 };
+
+
