@@ -6,12 +6,12 @@ exports.getAll = async () => {
 }
 
 exports.create = async (medicalSpecialty) => {
-    const [row,field] = await db.execute(`INSERT INTO medicalspecialty (NameMedicalSpecialty) VALUES ('${medicalSpecialty.name}')`);
+    const [row,field] = await db.execute(`INSERT INTO medicalspecialty (namemedicalspecialty) VALUES ('${medicalSpecialty.name}')`);
     return row;
 }
 
 exports.update = async (id, medicalSpecialty) => {
-    const [row,field] = await db.execute(`UPDATE medicalspecialty SET NameMedicalSpecialty = '${medicalSpecialty.name}' WHERE id = ${id}`);
+    const [row,field] = await db.execute(`UPDATE medicalspecialty SET namemedicalspecialty = '${medicalSpecialty.name}' WHERE id = ${id}`);
     return row;
 }
 

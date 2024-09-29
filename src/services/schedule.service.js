@@ -13,7 +13,7 @@ exports.getAll = async () => {
 
 exports.create = async (schedule) => {
     const [result, fields] = await db.execute(`
-        INSERT INTO schedule (DateSchedule, TimeStart, TimeEnd, DoctorId)
+        INSERT INTO schedule (dateschedule, timestart, timeend, doctorid)
         VALUES (?, ?, ?, ?)`,
         [schedule.dateSchedule, schedule.timeStart, schedule.timeEnd, schedule.doctorId]
     );
@@ -23,8 +23,8 @@ exports.create = async (schedule) => {
 exports.update = async (dateSchedule, timeStart, timeEnd, doctorId, schedule) => {
     const [result, fields] = await db.execute(`
         UPDATE schedule
-        SET TimeStart = ?, TimeEnd = ?, DoctorId = ?
-        WHERE DateSchedule = ? AND TimeStart = ? AND TimeEnd = ? AND DoctorId = ?`,
+        SET timestart = ?, timeend = ?, doctorid = ?
+        WHERE dateschedule = ? AND timestart = ? AND timeend = ? AND doctorid = ?`,
         [schedule.timeStart, schedule.timeEnd, schedule.doctorId, dateSchedule, timeStart, timeEnd, doctorId]
     );
     return result;
@@ -33,14 +33,30 @@ exports.update = async (dateSchedule, timeStart, timeEnd, doctorId, schedule) =>
 exports.delete = async (dateSchedule, timeStart, timeEnd, doctorId) => {
     const [result, fields] = await db.execute(`
         DELETE FROM schedule 
-        WHERE DateSchedule = ? AND TimeStart = ? AND TimeEnd = ? AND DoctorId = ?`,
+        WHERE dateschedule = ? AND timestart = ? AND timeend = ? AND doctorid = ?`,
         [dateSchedule, timeStart, timeEnd, doctorId]
     );
     return result;
 };
 
+exports.getByDoctorIdDate = async (doctorId, date) => {
+  const [rows, fields] = await db.execute(
+    `
+        SELECT * FROM schedule WHERE doctorid = ? AND dateschedule = ?
+    `,
+    [doctorId, date]
+  );
+    const formattedRows = rows.map((item) => {
+       return {
+         ...item,
+         dateschedule: moment(item.dateschedule).format("YYYY-MM-DD"),
+       };
+     });
+     return formattedRows;
+};
+
 exports.getByDoctorId = async (doctorId) => {
-    const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE DoctorId = ?`, [doctorId]);
+    const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE doctorid = ?`, [doctorId]);
     const formattedRows = rows.map(item => {
         return {
             ...item,
@@ -51,7 +67,7 @@ exports.getByDoctorId = async (doctorId) => {
 };
 
 exports.getByDate = async (date) => {
-    const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE DateSchedule = ?`, [date]);
+    const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE dateschedule = ?`, [date]);
     const formattedRows = rows.map(item => {
         return {
             ...item,
@@ -62,7 +78,7 @@ exports.getByDate = async (date) => {
 }
 
 exports.getByWeek = async (date) => {
-    const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE YEARWEEK(DateSchedule, 1) = YEARWEEK(?, 1)`, [date]);
+    const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE YEARWEEK(dateschedule, 1) = YEARWEEK(?, 1)`, [date]);
     const formattedRows = rows.map(item => {
         return {
             ...item,

@@ -18,8 +18,8 @@ exports.getAll = async (req, res) => {
 };
 
 exports.add = async (req, res) => {
-  console.log(req.file);
-  return 0;
+  // console.log(req.file);
+  // return 0;
   try {
     const { dateSchedule, timeStart, timeEnd, doctorId } = req.body;
     if (!dateSchedule || !timeStart || !timeEnd || !doctorId) {
@@ -28,6 +28,9 @@ exports.add = async (req, res) => {
         message: "Required fields missing",
       });
     }
+
+
+    
     const result = await scheduleService.create(req.body);
     res.status(200).json({
       errcode: 0,
@@ -174,5 +177,30 @@ exports.getByWeek = async (req, res) => {
       message: "Get schedules by week error",
       error: e,
     });
+  }
+};
+
+exports.getByDoctorIdDate = async (req, res, next) => {
+  const {doctorId, date} = req.params;
+  if (!doctorId || !date) {
+    res.status(400).json({
+      errcode: 1,
+      message: "Not enough require field"
+    })
+  }
+
+  try {
+    const result = await scheduleService.getByDoctorIdDate(doctorId,date);
+    res.status(200).json({
+      errcode: 0,
+      message: "Get schedules success",
+      data: result,
+    });
+  } catch (error) {
+     res.status(500).json({
+       errcode: 1,
+       message: "Get schedules error",
+       error: error,
+     });
   }
 };

@@ -10,6 +10,8 @@ const pool = mysql.createPool({
 
     database: 'hospital',
 
+    password: "1234"
+
 })
 
 export default pool;

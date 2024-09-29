@@ -2,6 +2,7 @@ import patientService from "../services/patient.service";
 import userService from "../services/user.service";
 import ApiError from "../../api-error";
 import multer from "multer";
+import fs from "fs";
 
 const storage = multer.memoryStorage();
 
@@ -71,53 +72,57 @@ exports.add = async (req, res, next) => {
   //     return res.status(500).json({ error: "Error uploading file" });
   //   }
 
-  // console.log(req.body);
+  console.log(req.body);
 
-    if (
-      !req.body.name ||
-      !req.body.birthday ||
-      !req.body.address ||
-      !req.body.profession
-    ) {
-      return next(new ApiError(400, "Not enough field require"));
-    }
+  if (
+    !req.body.name ||
+    !req.body.birthday ||
+    !req.body.address ||
+    !req.body.profession
+  ) {
+    return next(new ApiError(400, "Not enough field require"));
+  }
 
-    // const avatar = req.file.buffer.toString("base64");
-  
+  const filePath = "src/assets/default.jpg";
+
+  // Đọc tệp bằng fs
+  const avatar = await readFileImg(filePath);
+
+  try {
+    var addUser = await userService.add(req.body);
+  } catch (error) {
+    res.status(500).json({
+      errcode: 1,
+      message: "Add fail",
+    });
+    return next(new ApiError(500, "Can not add user"));
+  }
+
+  if (addUser.affectedRows === 1) {
     try {
-      var addUser = await userService.add(req.body);
+      const result = await patientService.add(
+        addUser.insertId,
+        req.body,
+        avatar
+      );
+      res.status(200).json({
+        errcode: 0,
+        message: "Add success",
+        data: result,
+      });
     } catch (error) {
       res.status(500).json({
         errcode: 1,
         message: "Add fail",
-      });
-      return next(new ApiError(500, "Can not add user"));
-    }
-
-    if (addUser.affectedRows === 1) {
-      try {
-        const result = await patientService.add(
-          addUser.insertId,
-          req.body
-        );
-        res.status(200).json({
-          errcode: 0,
-          message: "Add success",
-          data: result,
-        });
-      } catch (error) {
-        res.status(500).json({
-          errcode: 1,
-          message: "Add fail",
-          error: error,
-        });
-      }
-    } else {
-      res.status(500).json({
-        errcode: 1,
-        message: "Add faild",
+        error: error,
       });
     }
+  } else {
+    res.status(500).json({
+      errcode: 1,
+      message: "Can not add user",
+    });
+  }
   // });
 };
 
@@ -210,4 +215,17 @@ exports.delete = async (req, res, next) => {
   }
 };
 
+const readFileImg = async (filePath) => {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        console.log(err);
+        reject("Không thể đọc tệp"); // Reject the promise with the error message
+      }
 
+      // Convert file to Base64
+      const avatar = data.toString("base64");
+      resolve(avatar); // Resolve the promise with the avatar
+    });
+  });
+};
