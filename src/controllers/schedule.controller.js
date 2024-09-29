@@ -204,3 +204,7 @@ exports.getByDoctorIdDate = async (req, res, next) => {
      });
   }
 };
+
+exports.getDetail = async (req, res, next) => {
+  
+};

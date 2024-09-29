@@ -87,3 +87,36 @@ exports.getByWeek = async (date) => {
     });
     return formattedRows;
 }
+
+exports.getDetail = async (dateSchedule, timeStart, timeEnd, doctorId, patientId) => {
+  const [rows, fields] = await db.execute(
+    `
+        SELECT
+        schedule.dateschedule,
+        schedule.timestart,
+        schedule.timeend,
+        booking.timebooking,
+        booking.status,
+        doctor.name AS namedoctor,
+        doctor.birthday AS birthdaydoctor,
+        doctor.gender AS genderdoctor,
+        doctor.avatar AS avatardoctor,
+        doctor.associateprofessor,
+        medicalspecialty.namemedicalspecialty,
+        patient.name AS namepatient,
+        patient.birthday AS birthdaypatient,
+        patient.address,
+        patient.profession,
+        patient.gender AS genderpatient,
+        patient.avatar AS  avatarpatient
+        FROM schedule
+        JOIN booking ON schedule.dateschedule = booking.datebooking AND schedule.timestart = booking.timestart AND schedule.timeend = booking.timeend AND schedule.doctorid = booking.doctorid
+        JOIN doctor ON schedule.doctorid = doctor.id
+        JOIN patient ON booking.patientid = patient.id
+        JOIN medicalspecialty ON doctor.idmedicalspecialty = medicalspecialty.id
+        WHERE
+        schedule.dateschedule = ? AND schedule.timestart = ? AND schedule.timeend = ? AND schedule.doctorid = ? AND patient.id = ?
+    `,
+    [dateSchedule, timeStart, timeEnd, doctorId, patientId]
+  );
+};
