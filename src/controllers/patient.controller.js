@@ -72,7 +72,7 @@ exports.add = async (req, res, next) => {
   //     return res.status(500).json({ error: "Error uploading file" });
   //   }
 
-  console.log(req.body);
+  // console.log(req.body);
 
   if (
     !req.body.name ||
@@ -89,38 +89,17 @@ exports.add = async (req, res, next) => {
   const avatar = await readFileImg(filePath);
 
   try {
-    var addUser = await userService.add(req.body);
+    const result = await patientService.add(req.body, avatar);
+    res.status(200).json({
+      errcode: 0,
+      message: "Add patient success",
+      data: result,
+    });
   } catch (error) {
     res.status(500).json({
       errcode: 1,
-      message: "Add fail",
-    });
-    return next(new ApiError(500, "Can not add user"));
-  }
-
-  if (addUser.affectedRows === 1) {
-    try {
-      const result = await patientService.add(
-        addUser.insertId,
-        req.body,
-        avatar
-      );
-      res.status(200).json({
-        errcode: 0,
-        message: "Add success",
-        data: result,
-      });
-    } catch (error) {
-      res.status(500).json({
-        errcode: 1,
-        message: "Add fail",
-        error: error,
-      });
-    }
-  } else {
-    res.status(500).json({
-      errcode: 1,
-      message: "Can not add user",
+      message: "Add patient fail",
+      error: error,
     });
   }
   // });

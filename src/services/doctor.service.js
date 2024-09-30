@@ -1,4 +1,5 @@
 import db from "../config/connectionDB";
+import userService from "../services/user.service";
 
 exports.getAll = async () => {
   const [row, fields] = await db.execute(
@@ -56,23 +57,75 @@ exports.getDoctorSalient = async () => {
 };
 
 // Thêm doctor không có ảnh đại diện
-exports.add = async (id, doctorBody, avatar) => {
-  const [row, fields] = await db.execute(
-    `INSERT INTO doctor (id, name, birthday, gender, avatar, scoreevaluate, associateprofessor, numberevaluate, idmedicalspecialty) 
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      id,
-      doctorBody.name,
-      doctorBody.birthday,
-      doctorBody.gender,
-      avatar,
-      doctorBody.scoreEvaluate,
-      doctorBody.associateProfessor,
-      doctorBody.numberEvaluate,
-      doctorBody.idMedicalSpecialty,
-    ]
-  );
-  return row;
+// exports.add = async (id, doctorBody, avatar) => {
+
+//   const result = await userService.add(doctorBody);
+
+//   const [row, fields] = await db.execute(
+//     `INSERT INTO doctor (id, name, birthday, gender, avatar, scoreevaluate, associateprofessor, numberevaluate, idmedicalspecialty)
+//      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+//     [
+//       id,
+//       doctorBody.name,
+//       doctorBody.birthday,
+//       doctorBody.gender,
+//       avatar,
+//       doctorBody.scoreEvaluate,
+//       doctorBody.associateProfessor,
+//       doctorBody.numberEvaluate,
+//       doctorBody.idMedicalSpecialty,
+//     ]
+//   );
+//   return row;
+// };
+
+exports.add = async (doctorBody, avatar) => {
+  const connection = await db.getConnection();
+  await connection.beginTransaction();
+
+  try {
+    // Thêm vào bảng user
+    const result = await userService.add(doctorBody);
+
+    if (result.affectedRows === 1) {
+      try {
+        const [row, fields] = await connection.execute(
+          `INSERT INTO doctor (id, name, birthday, gender, avatar, scoreevaluate, associateprofessor, numberevaluate, idmedicalspecialty) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            result.insertId,
+            doctorBody.name,
+            doctorBody.birthday,
+            doctorBody.gender,
+            avatar,
+            doctorBody.scoreEvaluate,
+            doctorBody.associateProfessor,
+            doctorBody.numberEvaluate,
+            doctorBody.idMedicalSpecialty,
+          ]
+        );
+
+        // Commit transaction nếu cả hai thao tác đều thành công
+        await connection.commit();
+        return row;
+      } catch (error) {
+        // Rollback và ném lỗi ra ngoài nếu có lỗi khi thêm vào doctor
+        await connection.rollback();
+        throw error; // Ném lỗi để xử lý ở nơi khác
+      }
+    } else {
+      // Nếu không thêm được user, rollback
+      await connection.rollback();
+      throw new Error("Failed to add user.");
+    }
+  } catch (error) {
+    // Rollback nếu có lỗi xảy ra
+    await connection.rollback();
+    throw error; // Ném lỗi ra ngoài để xử lý tiếp
+  } finally {
+    // Đóng kết nối
+    await connection.release();
+  }
 };
 
 exports.update = async (id, doctorBody, avatar) => {

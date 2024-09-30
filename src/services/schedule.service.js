@@ -5,7 +5,7 @@ exports.getAll = async () => {
     const formattedRows = rows.map(item => {
         return {
             ...item,
-            DateSchedule: moment(item.DateSchedule).format('YYYY-MM-DD')
+            dateschedule: moment(item.dateschedule).format('YYYY-MM-DD')
         };
     });
     return formattedRows;
@@ -39,6 +39,8 @@ exports.delete = async (dateSchedule, timeStart, timeEnd, doctorId) => {
     return result;
 };
 
+
+//Để dùng trong booking controller để xét điều kiện chọn trong khung giờ khám bệnh của bác sĩ
 exports.getByDoctorIdDate = async (doctorId, date) => {
   const [rows, fields] = await db.execute(
     `
@@ -53,25 +55,25 @@ exports.getByDoctorIdDate = async (doctorId, date) => {
        };
      });
      return formattedRows;
-};
+};  
 
-exports.getByDoctorId = async (doctorId) => {
-    const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE doctorid = ?`, [doctorId]);
-    const formattedRows = rows.map(item => {
-        return {
-            ...item,
-            DateSchedule: moment(item.DateSchedule).format('YYYY-MM-DD')
-        };
-    });
-    return formattedRows;
-};
+// exports.getByDoctorId = async (doctorId) => {
+//     const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE doctorid = ?`, [doctorId]);
+//     const formattedRows = rows.map(item => {
+//         return {
+//             ...item,
+//             dateschedule: moment(item.datebchedule).format('YYYY-MM-DD')
+//         };
+//     });
+//     return formattedRows;
+// };
 
 exports.getByDate = async (date) => {
     const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE dateschedule = ?`, [date]);
     const formattedRows = rows.map(item => {
         return {
             ...item,
-            DateSchedule: moment(item.DateSchedule).format('YYYY-MM-DD')
+            dateschedule: moment(item.dateschedule).format('YYYY-MM-DD')
         };
     });
     return formattedRows;
@@ -82,41 +84,9 @@ exports.getByWeek = async (date) => {
     const formattedRows = rows.map(item => {
         return {
             ...item,
-            DateSchedule: moment(item.DateSchedule).format('YYYY-MM-DD')
+            dateschedule: moment(item.dateschedule).format('YYYY-MM-DD')
         };
     });
     return formattedRows;
 }
 
-exports.getDetail = async (dateSchedule, timeStart, timeEnd, doctorId, patientId) => {
-  const [rows, fields] = await db.execute(
-    `
-        SELECT
-        schedule.dateschedule,
-        schedule.timestart,
-        schedule.timeend,
-        booking.timebooking,
-        booking.status,
-        doctor.name AS namedoctor,
-        doctor.birthday AS birthdaydoctor,
-        doctor.gender AS genderdoctor,
-        doctor.avatar AS avatardoctor,
-        doctor.associateprofessor,
-        medicalspecialty.namemedicalspecialty,
-        patient.name AS namepatient,
-        patient.birthday AS birthdaypatient,
-        patient.address,
-        patient.profession,
-        patient.gender AS genderpatient,
-        patient.avatar AS  avatarpatient
-        FROM schedule
-        JOIN booking ON schedule.dateschedule = booking.datebooking AND schedule.timestart = booking.timestart AND schedule.timeend = booking.timeend AND schedule.doctorid = booking.doctorid
-        JOIN doctor ON schedule.doctorid = doctor.id
-        JOIN patient ON booking.patientid = patient.id
-        JOIN medicalspecialty ON doctor.idmedicalspecialty = medicalspecialty.id
-        WHERE
-        schedule.dateschedule = ? AND schedule.timestart = ? AND schedule.timeend = ? AND schedule.doctorid = ? AND patient.id = ?
-    `,
-    [dateSchedule, timeStart, timeEnd, doctorId, patientId]
-  );
-};

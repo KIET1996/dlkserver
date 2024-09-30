@@ -281,3 +281,128 @@ exports.updateStatus = async (req, res, next) => {
     });
   }
 };
+
+exports.getByDate = async (req, res, next) => {
+  const {date} = req.params;
+  if(!date){
+    res.status(500).json({
+      errcode: 1,
+      message: "Not enough field require"
+    });
+  }
+
+  try {
+    const result = await bookingService.getByDate(date);
+
+    if(result.lenght != 0){
+      res.status(200).json({
+        errcode: 0,
+        message: "Get booking by date success",
+        data: result
+      })
+    }else{
+      res.status(404).json({
+        errcode: 1,
+        message: "Not found booking"
+      })
+    }
+    
+  } catch (error) {
+    res.status(500).json({
+      errcode: 1,
+      message: "Get Booking by date error"
+    });
+  }
+};
+
+exports.getByMedicalSpecialty = async (req, res, next) => {
+  const {idMedicalSpecialty} = req.params;
+  if(!idMedicalSpecialty){
+    res.status(400).json({
+      errcode: 1,
+      message: "Not enough field require"
+    });
+  }
+
+  try {
+    const result = await bookingService.getByMedicalSpecialty(idMedicalSpecialty);
+
+    if(result.lenght != 0){
+      res.status(200).json({
+        errcode: 0,
+        message: "Get booking by medical specialty success",
+        data: result
+      })
+    }else{
+      res.status(404).json({
+        errcode: 1,
+        message: "Not found booking"
+      })
+    }
+  } catch (error) {
+    res.status(500).json({
+      errcode: 1,
+      message: "Get booking by medical specialty error"
+    });
+  }
+};
+
+exports.getByTime = async (req, res, next) => {
+  const {date, timeStart,timeEnd} = req.params;
+  if(!date, !timeStart, !timeEnd){
+    res.status(400).json({
+      errcode: 1,
+      message: "Not enough field require"
+    });
+  }
+
+  try {
+    const result = await bookingService.getByTime(date, timeStart,timeEnd);
+
+    if(result.lenght != 0){
+      res.status(200).json({
+        errcode: 0,
+        message: "Get booking by time success",
+        data: result
+      })
+    }else{
+      res.status(404).json({
+        errcode: 1,
+        message: "Not found booking"
+      })
+    }
+  } catch (error) {
+    res.status(500).json({
+      errcode: 1,
+      message: "Get booking by time error"
+    });
+  }
+};
+
+exports.getDetail = async (req, res, next) => {
+  const { dateBooking, timeStart, timeEnd, doctorId, patientId } = req.body;
+  if (!dateBooking || !timeStart || !timeEnd || !doctorId || !patientId) {
+    res.status(400).json({
+      errcode: 1,
+      message: "Not enough require field",
+    });
+  }
+
+  try {
+    const result = await bookingService.getDetail(dateBooking, timeStart, timeEnd, doctorId, patientId);
+
+    res.status(200).json({
+      errcode: 0,
+      message: "Get detail schedules success",
+      data: result
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      errcode: 1,
+      message: "Get detail schedules error",
+      error: error,
+    });
+  }
+};
+

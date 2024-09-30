@@ -29,8 +29,6 @@ exports.add = async (req, res) => {
       });
     }
 
-
-    
     const result = await scheduleService.create(req.body);
     res.status(200).json({
       errcode: 0,
@@ -49,15 +47,33 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { dateSchedule, timeStart, timeEnd, doctorId } = req.params;
-    const { timeStart: newTimeStart, timeEnd: newTimeEnd, doctorId: newDoctorId } = req.body;
+    const {
+      timeStart: newTimeStart,
+      timeEnd: newTimeEnd,
+      doctorId: newDoctorId,
+    } = req.body;
 
-    if (!dateSchedule || !timeStart || !timeEnd || !doctorId || !newTimeStart || !newTimeEnd || !newDoctorId) {
+    if (
+      !dateSchedule ||
+      !timeStart ||
+      !timeEnd ||
+      !doctorId ||
+      !newTimeStart ||
+      !newTimeEnd ||
+      !newDoctorId
+    ) {
       return res.status(400).json({
         errcode: 1,
         message: "Required fields missing",
       });
     }
-    const result = await scheduleService.update(dateSchedule, timeStart, timeEnd, doctorId, req.body);
+    const result = await scheduleService.update(
+      dateSchedule,
+      timeStart,
+      timeEnd,
+      doctorId,
+      req.body
+    );
     if (result.affectedRows === 0) {
       return res.status(404).json({
         errcode: 1,
@@ -87,7 +103,12 @@ exports.delete = async (req, res) => {
         message: "Required fields missing",
       });
     }
-    const result = await scheduleService.delete(dateSchedule, timeStart, timeEnd, doctorId);
+    const result = await scheduleService.delete(
+      dateSchedule,
+      timeStart,
+      timeEnd,
+      doctorId
+    );
     if (result.affectedRows === 0) {
       return res.status(404).json({
         errcode: 1,
@@ -108,29 +129,29 @@ exports.delete = async (req, res) => {
   }
 };
 
-exports.getByDoctorId = async (req, res) => {
-  try {
-    const { doctorId } = req.params;
-    if (!doctorId) {
-      return res.status(400).json({
-        errcode: 1,
-        message: "Required fields missing",
-      });
-    }
-    const result = await scheduleService.getByDoctorId(doctorId);
-    res.status(200).json({
-      errcode: 0,
-      message: "Get schedules by doctorId success",
-      data: result,
-    });
-  } catch (e) {
-    res.status(500).json({
-      errcode: 1,
-      message: "Get schedules by doctorId error",
-      error: e,
-    });
-  }
-};
+// exports.getByDoctorId = async (req, res) => {
+//   try {
+//     const { doctorId } = req.params;
+//     if (!doctorId) {
+//       return res.status(400).json({
+//         errcode: 1,
+//         message: "Required fields missing",
+//       });
+//     }
+//     const result = await scheduleService.getByDoctorId(doctorId);
+//     res.status(200).json({
+//       errcode: 0,
+//       message: "Get schedules by doctorId success",
+//       data: result,
+//     });
+//   } catch (e) {
+//     res.status(500).json({
+//       errcode: 1,
+//       message: "Get schedules by doctorId error",
+//       error: e,
+//     });
+//   }
+// };
 
 exports.getByDate = async (req, res) => {
   try {
@@ -181,30 +202,29 @@ exports.getByWeek = async (req, res) => {
 };
 
 exports.getByDoctorIdDate = async (req, res, next) => {
-  const {doctorId, date} = req.params;
+  const { doctorId, date } = req.params;
   if (!doctorId || !date) {
     res.status(400).json({
       errcode: 1,
-      message: "Not enough require field"
-    })
+      message: "Not enough require field",
+    });
   }
 
   try {
-    const result = await scheduleService.getByDoctorIdDate(doctorId,date);
+    const result = await scheduleService.getByDoctorIdDate(doctorId, date);
     res.status(200).json({
       errcode: 0,
       message: "Get schedules success",
       data: result,
     });
   } catch (error) {
-     res.status(500).json({
-       errcode: 1,
-       message: "Get schedules error",
-       error: error,
-     });
+    res.status(500).json({
+      errcode: 1,
+      message: "Get schedules error",
+      error: error,
+    });
   }
 };
 
-exports.getDetail = async (req, res, next) => {
-  
-};
+
+

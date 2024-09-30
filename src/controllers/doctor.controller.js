@@ -3,6 +3,7 @@ import userService from "../services/user.service";
 import ApiError from "../../api-error";
 import multer from "multer";
 import fs from "fs";
+import db from "../config/connectionDB";
 
 const storage = multer.memoryStorage();
 
@@ -90,35 +91,19 @@ exports.add = async (req, res, next) => {
   const avatar = await readFileImg(filePath);
 
   // console.log(avatar);
-
-  // Thêm user vào cơ sở dữ liệu
-  var addUser = await userService.add(req.body);
-
-  if (addUser.affectedRows === 1) {
-    try {
-      // Thêm doctor vào cơ sở dữ liệu
-      const result = await doctorService.add(
-        addUser.insertId,
-        req.body,
-        avatar
-      );
-
-      res.status(200).json({
-        errcode: 0,
-        message: "Add success",
-        data: result,
-      });
-    } catch (error) {
-      res.status(500).json({
-        errcode: 1,
-        message: "Add fail: could not add doctor",
-        error: error,
-      });
-    }
-  } else {
+  try {
+    // Thêm doctor vào cơ sở dữ liệu
+    const result = await doctorService.add(req.body, avatar);
+    res.status(200).json({
+      errcode: 0,
+      message: "Add success",
+      data: result,
+    });
+  } catch (error) {
     res.status(500).json({
       errcode: 1,
-      message: "Add fail: could not add user",
+      message: "Add fail: could not add doctor",
+      error: error,
     });
   }
   // });
