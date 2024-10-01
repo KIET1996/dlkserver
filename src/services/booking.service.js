@@ -226,8 +226,6 @@ exports.updateStatus = async (bookingBody) => {
   return result;
 };
 
-//
-
 exports.getByDate = async (date) => {
   const [rows, fields] = await db.execute(
     `SELECT 

@@ -13,14 +13,14 @@ exports.getAll = async () => {
 }
 
 exports.getById = async (id) => {
-    const [row, field] = await db.execute(`SELECT * FROM announcement WHERE Id = ?`, [id]);
+    const [row, field] = await db.execute(`SELECT * FROM announcement WHERE id = ?`, [id]);
     row.DateTime = moment(row.DateTime).format('YYYY-MM-DD HH:mm:ss');
     return row; 
 }
 
 exports.create = async (announcement) => {
     const [row, field] = await db.execute(`
-        INSERT INTO announcement (Content, DateTime, Header, Status, UserId)
+        INSERT INTO announcement (content, datetime, header, status, userid)
         VALUES (?, ?, ?, ?, ?)`, 
         [announcement.content, announcement.dateTime, announcement.header, announcement.status, announcement.userId]
     );
@@ -30,7 +30,7 @@ exports.create = async (announcement) => {
 exports.update = async (id, announcement) => {
     const [row, field] = await db.execute(`
         UPDATE announcement
-        SET Content = ?, DateTime = ?, Header = ?, Status = ?, UserId = ?
+        SET content = ?, datetime = ?, header = ?, status = ?, userid = ?
         WHERE Id = ?`, 
         [announcement.content, announcement.dateTime, announcement.header, announcement.status, announcement.userId, id]
     );
@@ -38,6 +38,6 @@ exports.update = async (id, announcement) => {
 }
 
 exports.delete = async (id) => {
-    const [row, field] = await db.execute(`DELETE FROM announcement WHERE Id = ?`, [id]);
+    const [row, field] = await db.execute(`DELETE FROM announcement WHERE id = ?`, [id]);
     return row;
 }

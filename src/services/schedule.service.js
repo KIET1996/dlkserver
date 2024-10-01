@@ -1,7 +1,13 @@
 import db from '../config/connectionDB';
 import moment from 'moment';
+//sửa lại lấy đầy đủ thông tin 
 exports.getAll = async () => {
-    const [rows, fields] = await db.execute(`SELECT * FROM schedule`);
+    const [rows, fields] = await db.execute(`
+        SELECT 
+        * 
+        FROM schedule
+        JOIN doctor ON doctor.id = schedule.doctorid
+    `);
     const formattedRows = rows.map(item => {
         return {
             ...item,
@@ -77,7 +83,7 @@ exports.getByDate = async (date) => {
         };
     });
     return formattedRows;
-}
+};
 
 exports.getByWeek = async (date) => {
     const [rows, fields] = await db.execute(`SELECT * FROM schedule WHERE YEARWEEK(dateschedule, 1) = YEARWEEK(?, 1)`, [date]);
@@ -88,5 +94,8 @@ exports.getByWeek = async (date) => {
         };
     });
     return formattedRows;
-}
+};
 
+exports.getDetail = async (dateSchedule, timeStart, timeEnd, doctorId) => {
+
+};
